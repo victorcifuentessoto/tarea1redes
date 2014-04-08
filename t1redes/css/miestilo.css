@@ -1,0 +1,22 @@
+body { 
+	background-color: white;
+	color: #0B243B;
+}
+
+.form-group {
+	margin: 0 auto;
+	width: 65%;
+
+
+}
+.cuadros{
+	width: 25%
+}
+
+
+.container{
+	position: relative;
+	margin: 0 auto;
+	width: 60%;
+	height: 100%;
+}
