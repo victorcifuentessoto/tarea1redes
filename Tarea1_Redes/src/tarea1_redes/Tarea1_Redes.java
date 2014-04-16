@@ -15,10 +15,6 @@ import java.net.*;
  * @author Victor
  */
 public final class Tarea1_Redes {
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) throws Exception {
         int port = 8090;
         ServerSocket listener = new ServerSocket(port);

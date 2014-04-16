@@ -6,7 +6,7 @@ import java.util.*;
 
 public final class HttpRequest implements Runnable {
  
-    final static String CRLF = "\r\n";//For convenience
+    final static String CRLF = "\r\n";
     Socket socket;
 
     // Constructor
@@ -15,53 +15,35 @@ public final class HttpRequest implements Runnable {
        this.socket = socket;
     }
 
-    // Implement the run() method of the Runnable interface.
-   public void run()
-   {
-       try {
-           processRequest();
-       } catch (Exception e) {
-           System.out.println(e);
+    public void run()
+    {
+        try {
+            processRequest();
+        } catch (Exception e) {
+            System.out.println(e);
        }
-   }
+    }
 
     private void processRequest() throws Exception
     {
         InputStream is = socket.getInputStream();
-
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());  	
 
         // Set up input stream filters.
   
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
-  
-        String requestLine = br.readLine();
-   
-        System.out.println();  //Echoes request line out to screen
+        String requestLine = br.readLine(); //Se obtiene la primera línea del request.
+        System.out.println();  //imprime el request message
         System.out.println(requestLine);
-   
-        //The following obtains the IP address of the incoming connection.
 
-        InetAddress incomingAddress = socket.getInetAddress();
-        String ipString= incomingAddress.getHostAddress();
-        System.out.println("The incoming address is:   " + ipString);
-
-		
-			
-        //String Tokenizer is used to extract file name from this class.
+        //String tokens para extraer el nombre del archivo y el metodo (GET o POST)
         StringTokenizer tokens = new StringTokenizer(requestLine);
-        tokens.nextToken();  // skip over the method, which should be �GET�
-        String fileName = tokens.nextToken();
-        // Prepend a �.� so that file request is within the current directory.
+        String method = tokens.nextToken();  //Se obtiene el metodo
+        String fileName = tokens.nextToken();  //Se obtiene el nombre del archivo
+        //Se antepone un punto para que el archivo lo encuentre en el directorio actual.
         fileName = "." + fileName;
 
-        String headerLine = null;
-        while ((headerLine = br.readLine()).length() != 0) { //While the header still has text, print it
-            System.out.println(headerLine);
-        }
-
-
-        // Open the requested file.
+        // Se abre el archivo.
         FileInputStream fis = null;
         boolean fileExists = true;
         try {
@@ -71,17 +53,17 @@ public final class HttpRequest implements Runnable {
         }   
 
         //Construct the response message
-        String statusLine = null; //Set initial values to null
+        String statusLine = null;
         String contentTypeLine = null;
         String entityBody = null;
         if (fileExists) {
-                statusLine = "HTTP/1.1 200 OK: ";
-                contentTypeLine = "Content-Type: " +
-                 contentType(fileName) + CRLF;
-        } else {
-                statusLine = "HTTP/1.1 404 Not Found: ";
-                contentTypeLine = "Content-Type: text/html" + CRLF;
-                entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + "<BODY>Not Found</BODY></HTML>";
+            statusLine = "HTTP/1.1 200 OK: ";
+            contentTypeLine = "Content-Type: " +
+            contentType(fileName) + CRLF;
+        }else{
+            statusLine = "HTTP/1.1 404 Not Found: ";
+            contentTypeLine = "Content-Type: text/html" + CRLF;
+            entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + "<BODY>Not Found</BODY></HTML>";
         }
         //End of response message construction
 
@@ -96,22 +78,21 @@ public final class HttpRequest implements Runnable {
 
         // Send the entity body.
         if (fileExists) {
-         sendBytes(fis, os);
-         fis.close();
-        } else {
-         os.writeBytes(entityBody);
+            sendBytes(fis, os);
+            fis.close();
+        }else{
+            os.writeBytes(entityBody);
         }
 
         os.close(); //Close streams and socket.
         br.close();
         socket.close();
 
-       }
+    }
 
-     //Need this one for sendBytes function called in processRequest
-     private static void sendBytes(FileInputStream fis, OutputStream os)
-     throws Exception
-     {
+    //Need this one for sendBytes function called in processRequest
+    private static void sendBytes(FileInputStream fis, OutputStream os) throws Exception
+    {
         // Construct a 1K buffer to hold bytes on their way to the socket.
         byte[] buffer = new byte[1024];
         int bytes = 0;
