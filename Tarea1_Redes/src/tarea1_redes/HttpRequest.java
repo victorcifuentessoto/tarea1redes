@@ -21,7 +21,7 @@ public final class HttpRequest implements Runnable {
             processRequest();
         } catch (Exception e) {
             System.out.println(e);
-       }
+        }
     }
 
     private void processRequest() throws Exception
@@ -42,6 +42,15 @@ public final class HttpRequest implements Runnable {
         String fileName = tokens.nextToken();  //Se obtiene el nombre del archivo
         //Se antepone un punto para que el archivo lo encuentre en el directorio actual.
         fileName = "." + fileName;
+        
+        String headerLine = null;
+        while ((headerLine = br.readLine()).length() != 0) { //While the header still has text, print it
+            System.out.println(headerLine);
+        }
+        if(method.equals("POST")){
+            
+        }
+        
 
         // Se abre el archivo.
         FileInputStream fis = null;
@@ -52,7 +61,7 @@ public final class HttpRequest implements Runnable {
             fileExists = false;
         }   
 
-        //Construct the response message
+        //Construcción del mensaje de respuesta http.
         String statusLine = null;
         String contentTypeLine = null;
         String entityBody = null;
@@ -63,28 +72,28 @@ public final class HttpRequest implements Runnable {
         }else{
             statusLine = "HTTP/1.1 404 Not Found: ";
             contentTypeLine = "Content-Type: text/html" + CRLF;
-            entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + "<BODY>Not Found</BODY></HTML>";
+            entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + "<BODY>PAGE NOT FOUND</BODY></HTML>";
         }
-        //End of response message construction
 
-        // Send the status line.
+        // Envío del statusLine.
         os.writeBytes(statusLine);
 
-        // Send the content type line.
+        // Envío del tipo de contenido.
         os.writeBytes(contentTypeLine);
 
-        // Send a blank line to indicate the end of the header lines.
+        // Envío de una línea en blanco para indicar el final de header line.
         os.writeBytes(CRLF);
 
-        // Send the entity body.
+        // Envío del cuerpo de la página.
         if (fileExists) {
-            sendBytes(fis, os);
+            sendBytes(fis, os); //Si la página existe se envian las líneas del archivo
+                                //encontrado.
             fis.close();
         }else{
-            os.writeBytes(entityBody);
+            os.writeBytes(entityBody);  //Sino se escribe las líneas del archivo no encontrad (Not found).
         }
 
-        os.close(); //Close streams and socket.
+        os.close(); //Cierre de streams y socket.
         br.close();
         socket.close();
 
@@ -93,23 +102,21 @@ public final class HttpRequest implements Runnable {
     //Need this one for sendBytes function called in processRequest
     private static void sendBytes(FileInputStream fis, OutputStream os) throws Exception
     {
-        // Construct a 1K buffer to hold bytes on their way to the socket.
+        // Construcción de 1 KB de buffer para el socket.
         byte[] buffer = new byte[1024];
         int bytes = 0;
 
-        // Copy requested file into the socket�s output stream.
+        // Copia el requested file aloutput del socket.
         while((bytes = fis.read(buffer)) != -1 ) {
            os.write(buffer, 0, bytes);
         }
-     }
+    }
+    
+    //Esta función obtiene el tipo de archivo pedido.
     private static String contentType(String fileName)
     {
         if(fileName.endsWith(".htm") || fileName.endsWith(".html"))
             return "text/html";
-        if(fileName.endsWith(".jpg"))
-             return "text/jpg";
-        if(fileName.endsWith(".gif"))
-             return "text/gif";
         return "application/octet-stream";
     }
 }
