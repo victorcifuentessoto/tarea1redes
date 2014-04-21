@@ -27,29 +27,49 @@ public final class HttpRequest implements Runnable {
     private void processRequest() throws Exception
     {
         InputStream is = socket.getInputStream();
-        DataOutputStream os = new DataOutputStream(socket.getOutputStream());  	
+        DataOutputStream os = new DataOutputStream(socket.getOutputStream());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        int ch;
 
-        // Set up input stream filters.
+        //Escritura del request message al stream del socket
+        while((ch = is.read()) != -1) {
+            outputStream.write(ch);
+            if (ch == '\n') {
+                ch = is.read();
+                if (ch == '\n' || ch == '\r')
+                    break;
+                outputStream.write(ch);
+            }
+        }
+        
+        //Guarda el request message.
+        String headerRequest = new String(outputStream.toByteArray(), "UTF-8");
+
+        // Seteando inputs.
   
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String requestLine = br.readLine(); //Se obtiene la primera línea del request.
-        System.out.println();  //imprime el request message
-        System.out.println(requestLine);
 
         //String tokens para extraer el nombre del archivo y el metodo (GET o POST)
-        StringTokenizer tokens = new StringTokenizer(requestLine);
+        StringTokenizer tokens = new StringTokenizer(headerRequest);
         String method = tokens.nextToken();  //Se obtiene el metodo
         String fileName = tokens.nextToken();  //Se obtiene el nombre del archivo
         //Se antepone un punto para que el archivo lo encuentre en el directorio actual.
         fileName = "." + fileName;
         
-        String headerLine = null;
-        while ((headerLine = br.readLine()).length() != 0) { //While the header still has text, print it
-            System.out.println(headerLine);
-        }
         if(method.equals("POST")){
-            
+            outputStream = new ByteArrayOutputStream();
+            ch = is.read();
+            while((ch = is.read()) != -1) {
+                outputStream.write(ch);
+                if (ch == '\n' || ch == '\r' || ch == '4'){
+                    break;
+                }
+            }
+            String payload = new String(outputStream.toByteArray(), "UTF-8");
+            //puedes imprimirla si quieres:
+            System.out.println(payload);
         }
+        
         
 
         // Se abre el archivo.
