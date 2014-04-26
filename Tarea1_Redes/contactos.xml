@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<contactos>
+<contacto>
+<nombre>nombre=pablo</nombre>
+<IP>direccion+ip=192.168.1.0</IP>
+<puerto>Puerto=1994</puerto>
+</contacto>
+</contactos>

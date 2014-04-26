@@ -1,9 +1,34 @@
 package tarea1_redes;
 
 import java.io.*;
+import java.io.FileNotFoundException;
 import java.net.*;
 import java.util.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import org.jespxml.JespXML;
+import org.jespxml.excepciones.AtributoNotFoundException;
+import org.jespxml.excepciones.TagHijoNotFoundException;
+import org.jespxml.modelo.Atributo;
+import org.jespxml.modelo.Tag;
+import org.xml.sax.SAXException;
+/*
+//<librerias para el XML
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+
+import java.io.File;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+//librerias para el XML>
+*/
 public final class HttpRequest implements Runnable {
  
     final static String CRLF = "\r\n";
@@ -68,6 +93,84 @@ public final class HttpRequest implements Runnable {
             String payload = new String(outputStream.toByteArray(), "UTF-8");
             //puedes imprimirla si quieres:
             System.out.println(payload);
+            //extraccion de data de payload
+
+             //YO CAMBIANDO COSAS
+           //se separaron las variables
+            String[] Personas = payload.split("&");
+            
+            for (int i = 0; i < Personas.length; i++) {
+                System.out.println(Personas[i]);
+            }
+            //Holi aca va lo del XML
+            
+            try {
+             //creo el objeto JespXML con el archivo que quiero crear
+             JespXML archivo = new JespXML("contactos.xml");
+             
+             //declaro el Tag raiz, que en esta caso se llama contactos
+             Tag contactos = new Tag("contactos");
+             
+             //creo el Tag contacto, que va a tener un nombre, ip y puerto
+             Tag contacto = new Tag("contacto");
+             Tag nombre, IP, puerto;
+             
+             //construyo los Tags nombre , IP y puerto y le agrego contenido
+             nombre = new Tag("nombre");
+             IP = new Tag("IP");
+             puerto = new Tag("puerto");
+             nombre.addContenido(Personas[0]);
+             IP.addContenido(Personas[1]);
+             puerto.addContenido(Personas[2]);
+             
+             //agrego el Tag nombre, ip  puerto al Tag contacto
+             contacto.addTagHijo(nombre);
+             contacto.addTagHijo(IP);
+             contacto.addTagHijo(puerto);
+             
+             //finalmente agrego al Tag contactos, el tag contacto
+             contactos.addTagHijo(contacto);
+             //y escribo el archivo XML
+             archivo.escribirXML(contactos);
+         } catch (ParserConfigurationException | FileNotFoundException ex) {
+             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (TransformerConfigurationException ex) {
+             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (TransformerException ex) {
+             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
+         }
+            
+            
+   
+        //Leer el XML########################################################
+            //listacontactos = new ArrayList<>();
+            try {
+             //Cargo el archivo
+             JespXML archivo = new JespXML("contactos.xml");
+             //leo el archivo y me retorna el tag raiz, que en este caso
+             // es contactos
+             Tag contactos = archivo.leerXML();
+             
+             
+             //Obtengo los tags que necesito, por el nombre
+                Tag contacto = contactos.getTagHijoByName("contacto");
+                Tag nombre = contacto.getTagHijoByName("nombre");
+                String nombrecontacto;
+                nombrecontacto = nombre.getContenido();
+                System.out.println("nombre: "+nombrecontacto);
+                     
+             //imprimo la información requerida
+             
+         } catch (ParserConfigurationException | IOException | SAXException ex) {
+             //exception lanzada cuando no se encuentra el atributo
+             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
+         }
+        //########################################################Leer el XML
+            
+            
+            //HASTA ACA
+            
+            
         }
         
         
