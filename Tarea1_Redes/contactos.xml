@@ -1,8 +1,20 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<contactos>
-<contacto>
-<nombre>nombre=pablo</nombre>
-<IP>direccion+ip=192.168.1.0</IP>
-<puerto>Puerto=1994</puerto>
-</contacto>
-</contactos>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <contactos>
+        <contacto>
+            <nombre>nombre</nombre>
+            <direccion_ip>direccion</direccion_ip>
+            <puerto>1234</puerto>
+        </contacto>
+        <contacto>
+            <nombre>nombre2</nombre>
+            <direccion_ip>direccion2</direccion_ip>
+            <puerto>123754</puerto>
+        </contacto>
+        <contacto>
+            <nombre>nombre</nombre>
+            <direccion_ip>direccion2</direccion_ip>
+            <puerto>1234</puerto>
+        </contacto>
+    </contactos>
+</root>

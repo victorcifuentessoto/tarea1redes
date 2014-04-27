@@ -1,37 +1,21 @@
 package tarea1_redes;
 
 import java.io.*;
-import java.io.FileNotFoundException;
 import java.net.*;
 import java.util.*;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import org.jespxml.JespXML;
-import org.jespxml.excepciones.AtributoNotFoundException;
-import org.jespxml.excepciones.TagHijoNotFoundException;
-import org.jespxml.modelo.Atributo;
-import org.jespxml.modelo.Tag;
-import org.xml.sax.SAXException;
-/*
-//<librerias para el XML
 import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
+import tarea1_redes.Contacto.ForSaveMultiple;
 
-import java.io.File;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-//librerias para el XML>
-*/
 public final class HttpRequest implements Runnable {
  
     final static String CRLF = "\r\n";
+    String[] list_contactos;
     Socket socket;
 
     // Constructor
@@ -54,16 +38,16 @@ public final class HttpRequest implements Runnable {
         InputStream is = socket.getInputStream();
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        int ch;
+        int bytes;
 
         //Escritura del request message al stream del socket
-        while((ch = is.read()) != -1) {
-            outputStream.write(ch);
-            if (ch == '\n') {
-                ch = is.read();
-                if (ch == '\n' || ch == '\r')
+        while((bytes = is.read()) != -1) {
+            outputStream.write(bytes);
+            if (bytes == '\n') {
+                bytes = is.read();
+                if (bytes == '\n' || bytes == '\r')
                     break;
-                outputStream.write(ch);
+                outputStream.write(bytes);
             }
         }
         
@@ -81,101 +65,133 @@ public final class HttpRequest implements Runnable {
         //Se antepone un punto para que el archivo lo encuentre en el directorio actual.
         fileName = "." + fileName;
         
-        if(method.equals("POST")){
-            outputStream = new ByteArrayOutputStream();
-            ch = is.read();
-            while((ch = is.read()) != -1) {
-                outputStream.write(ch);
-                if (ch == '\n' || ch == '\r' || ch == '4'){
-                    break;
-                }
-            }
-            String payload = new String(outputStream.toByteArray(), "UTF-8");
-            //puedes imprimirla si quieres:
-            System.out.println(payload);
-            //extraccion de data de payload
-
-             //YO CAMBIANDO COSAS
-           //se separaron las variables
-            String[] Personas = payload.split("&");
-            
-            for (int i = 0; i < Personas.length; i++) {
-                System.out.println(Personas[i]);
-            }
-            //Holi aca va lo del XML
-            
-            try {
-             //creo el objeto JespXML con el archivo que quiero crear
-             JespXML archivo = new JespXML("contactos.xml");
-             
-             //declaro el Tag raiz, que en esta caso se llama contactos
-             Tag contactos = new Tag("contactos");
-             
-             //creo el Tag contacto, que va a tener un nombre, ip y puerto
-             Tag contacto = new Tag("contacto");
-             Tag nombre, IP, puerto;
-             
-             //construyo los Tags nombre , IP y puerto y le agrego contenido
-             nombre = new Tag("nombre");
-             IP = new Tag("IP");
-             puerto = new Tag("puerto");
-             nombre.addContenido(Personas[0]);
-             IP.addContenido(Personas[1]);
-             puerto.addContenido(Personas[2]);
-             
-             //agrego el Tag nombre, ip  puerto al Tag contacto
-             contacto.addTagHijo(nombre);
-             contacto.addTagHijo(IP);
-             contacto.addTagHijo(puerto);
-             
-             //finalmente agrego al Tag contactos, el tag contacto
-             contactos.addTagHijo(contacto);
-             //y escribo el archivo XML
-             archivo.escribirXML(contactos);
-         } catch (ParserConfigurationException | FileNotFoundException ex) {
-             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
-         } catch (TransformerConfigurationException ex) {
-             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
-         } catch (TransformerException ex) {
-             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
-         }
-            
-            
-   
-        //Leer el XML########################################################
-            //listacontactos = new ArrayList<>();
-            try {
-             //Cargo el archivo
-             JespXML archivo = new JespXML("contactos.xml");
-             //leo el archivo y me retorna el tag raiz, que en este caso
-             // es contactos
-             Tag contactos = archivo.leerXML();
-             
-             
-             //Obtengo los tags que necesito, por el nombre
-                Tag contacto = contactos.getTagHijoByName("contacto");
-                Tag nombre = contacto.getTagHijoByName("nombre");
-                String nombrecontacto;
-                nombrecontacto = nombre.getContenido();
-                System.out.println("nombre: "+nombrecontacto);
-                     
-             //imprimo la información requerida
-             
-         } catch (ParserConfigurationException | IOException | SAXException ex) {
-             //exception lanzada cuando no se encuentra el atributo
-             Logger.getLogger(HttpRequest.class.getName()).log(Level.SEVERE, null, ex);
-         }
-        //########################################################Leer el XML
-            
-            
-            //HASTA ACA
-            
-            
+        while(true){
+            String context_length = tokens.nextToken();
+            if(context_length.equals("Content-Length:"))
+                break;
         }
         
+        int contador_form_data = Integer.parseInt(tokens.nextToken());
         
+        if(method.equals("POST")){
+            outputStream = new ByteArrayOutputStream();
+            bytes = is.read();
+            for(int i = 0; i < contador_form_data; i++) {
+                bytes = is.read();
+                outputStream.write(bytes);
+            }
+            //extraccion de data de payload
+            String payload = new String(outputStream.toByteArray(), "UTF-8");
+            
 
-        // Se abre el archivo.
+            //se separaron las variables
+            String[] Personas = payload.split("&");
+            
+            //Se crea la clase para archivos xml
+            ForSaveMultiple forSaveMultiple = new ForSaveMultiple();
+            
+            //Trabajando con archivos xml para guardar/mostrar contactos.
+            
+            try {
+                //Se abre el archivo xml de los contactos registrados.
+                File fXmlFile = new File("contactos.xml");
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                //Conversión del archivo. En caso de error se crea un nuevo contactos.xml
+                Document doc = dBuilder.parse(fXmlFile);
+                
+                //Se obtiene la lista de contactos por cada nodo <contacto> en el archivo.
+                NodeList lista_contactos = doc.getElementsByTagName("contacto");
+                
+                //Normaliza el archivo.
+                doc.getDocumentElement().normalize();
+                
+                for (int i = 0; i < lista_contactos.getLength(); i++) {
+                    Node nodo = lista_contactos.item(i);
+                    
+                    if (nodo.getNodeType() == Node.ELEMENT_NODE) {
+                        Element elemento = (Element) nodo;
+                        
+                        //Guardamos los datos del contacto del nodo actual en la clase contacto.
+                        Contacto contacto = new Contacto();
+                        
+                        contacto.setNombre(elemento.getElementsByTagName("nombre").item(0).getTextContent());
+                        contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
+                        contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
+                        forSaveMultiple.getList().add(contacto);
+                    }
+                }
+                
+                //Crea un contacto con sus datos
+                Contacto contacto_nuevo = new Contacto();
+                contacto_nuevo.setNombre(Personas[0].substring(7));
+                contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
+                contacto_nuevo.setPuerto(Personas[2].substring(7));
+                forSaveMultiple.getList().add(contacto_nuevo);
+                
+                JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+
+                Marshaller marshaller = jaxb.createMarshaller();
+
+                marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+                marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+                
+                File file = new File( "contactos.xml" );
+                marshaller.marshal( forSaveMultiple, file );
+                
+        //Caso de no encontrar el archivo.     
+            } catch (ParserConfigurationException | FileNotFoundException ex) {
+                Contacto contacto_nuevo = new Contacto();
+                contacto_nuevo.setNombre(Personas[0].substring(7));
+                contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
+                contacto_nuevo.setPuerto(Personas[2].substring(7));
+                forSaveMultiple.getList().add(contacto_nuevo);
+                
+                JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+
+                Marshaller marshaller = jaxb.createMarshaller();
+
+                marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+                marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+                
+                File file = new File( "contactos.xml" );
+                marshaller.marshal( forSaveMultiple, file );
+            }
+        }
+        else if(method.equals("GET") && fileName.equals("./vercontacto.html")){
+            //Se abre el archivo xml de los contactos registrados.
+            File fXmlFile = new File("contactos.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            //Conversión del archivo. En caso de error se crea un nuevo contactos.xml
+            Document doc = dBuilder.parse(fXmlFile);
+
+            //Se obtiene la lista de contactos por cada nodo <contacto> en el archivo.
+            NodeList lista_contactos = doc.getElementsByTagName("contacto");
+
+            //Normaliza el archivo.
+            doc.getDocumentElement().normalize();
+
+            list_contactos = new String[lista_contactos.getLength()];
+            
+            for (int i = 0; i < lista_contactos.getLength(); i++) {
+                Node nodo = lista_contactos.item(i);
+
+                if (nodo.getNodeType() == Node.ELEMENT_NODE) {
+                    Element elemento = (Element) nodo;
+
+                    Contacto contacto = new Contacto();
+
+                    contacto.setNombre(elemento.getElementsByTagName("nombre").item(0).getTextContent());
+                    contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
+                    contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
+                    
+                    list_contactos[i] = contacto.getNombre();
+                }
+            }
+        }
+
+        // Se abre el archivo html.
         FileInputStream fis = null;
         boolean fileExists = true;
         try {
@@ -213,7 +229,7 @@ public final class HttpRequest implements Runnable {
                                 //encontrado.
             fis.close();
         }else{
-            os.writeBytes(entityBody);  //Sino se escribe las líneas del archivo no encontrad (Not found).
+            os.writeBytes(entityBody);  //Sino se escribe las líneas del archivo no encontrado (Not found).
         }
 
         os.close(); //Cierre de streams y socket.
@@ -229,9 +245,9 @@ public final class HttpRequest implements Runnable {
         byte[] buffer = new byte[1024];
         int bytes = 0;
 
-        // Copia el requested file aloutput del socket.
+        // Copia el requested file al output del socket.
         while((bytes = fis.read(buffer)) != -1 ) {
-           os.write(buffer, 0, bytes);
+            os.write(buffer, 0, bytes);
         }
     }
     

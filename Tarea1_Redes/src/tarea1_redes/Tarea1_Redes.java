@@ -1,7 +1,5 @@
 package tarea1_redes;
 
-import java.util.*;
-import java.io.*;
 import java.net.*;
 
 
