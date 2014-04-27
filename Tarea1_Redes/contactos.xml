@@ -16,5 +16,10 @@
             <direccion_ip>direccion2</direccion_ip>
             <puerto>1234</puerto>
         </contacto>
+        <contacto>
+            <nombre>Victor</nombre>
+            <direccion_ip>192.168.0.1</direccion_ip>
+            <puerto>8542</puerto>
+        </contacto>
     </contactos>
 </root>

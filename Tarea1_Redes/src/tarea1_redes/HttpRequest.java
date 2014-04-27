@@ -38,6 +38,7 @@ public final class HttpRequest implements Runnable {
         InputStream is = socket.getInputStream();
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        //OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), "8859_1");
         int bytes;
 
         //Escritura del request message al stream del socket
@@ -63,17 +64,17 @@ public final class HttpRequest implements Runnable {
         String method = tokens.nextToken();  //Se obtiene el metodo
         String fileName = tokens.nextToken();  //Se obtiene el nombre del archivo
         //Se antepone un punto para que el archivo lo encuentre en el directorio actual.
-        fileName = "." + fileName;
-        
-        while(true){
-            String context_length = tokens.nextToken();
-            if(context_length.equals("Content-Length:"))
-                break;
-        }
-        
-        int contador_form_data = Integer.parseInt(tokens.nextToken());
+        fileName = "." + fileName; 
         
         if(method.equals("POST")){
+            while(true){
+                String context_length = tokens.nextToken();
+                if(context_length.equals("Content-Length:"))
+                    break;
+            }
+
+            int contador_form_data = Integer.parseInt(tokens.nextToken());
+            
             outputStream = new ByteArrayOutputStream();
             bytes = is.read();
             for(int i = 0; i < contador_form_data; i++) {
@@ -189,6 +190,13 @@ public final class HttpRequest implements Runnable {
                     list_contactos[i] = contacto.getNombre();
                 }
             }
+            /*writer.write("<div class=\"form-group\">\n" +
+                        "<label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
+                        "<select multiple class=\"form02\">");
+            for(int i = 0; i < list_contactos.length; i++){
+                writer.write("<option>"+list_contactos[i]+"</option>");
+            }
+            writer.write("</select>");*/
         }
 
         // Se abre el archivo html.
