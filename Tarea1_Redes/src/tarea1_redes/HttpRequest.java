@@ -107,6 +107,8 @@ public final class HttpRequest implements Runnable {
                 //Normaliza el archivo.
                 doc.getDocumentElement().normalize();
                 
+                list_contactos = new String[lista_contactos.getLength() + 1];
+                
                 for (int i = 0; i < lista_contactos.getLength(); i++) {
                     Node nodo = lista_contactos.item(i);
                     
@@ -120,6 +122,8 @@ public final class HttpRequest implements Runnable {
                         contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
                         contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
                         forSaveMultiple.getList().add(contacto);
+                        
+                        list_contactos[i] = contacto.getNombre();
                     }
                 }
                 
@@ -129,6 +133,8 @@ public final class HttpRequest implements Runnable {
                 contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
                 contacto_nuevo.setPuerto(Personas[2].substring(7));
                 forSaveMultiple.getList().add(contacto_nuevo);
+                
+                list_contactos[lista_contactos.getLength()] = contacto_nuevo.getNombre();
                 
                 JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
 
@@ -190,13 +196,6 @@ public final class HttpRequest implements Runnable {
                     list_contactos[i] = contacto.getNombre();
                 }
             }
-            /*writer.write("<div class=\"form-group\">\n" +
-                        "<label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
-                        "<select multiple class=\"form02\">");
-            for(int i = 0; i < list_contactos.length; i++){
-                writer.write("<option>"+list_contactos[i]+"</option>");
-            }
-            writer.write("</select>");*/
         }
 
         // Se abre el archivo html.
@@ -233,8 +232,87 @@ public final class HttpRequest implements Runnable {
 
         // Envío del cuerpo de la página.
         if (fileExists) {
-            sendBytes(fis, os); //Si la página existe se envian las líneas del archivo
+            if(fileName.equals("./vercontacto.html")){
+                os.writeBytes("<!DOCTYPE html>\n" +
+                    "<html lang=\"es\">\n" +
+                    "<meta charset=\"utf-8\"> \n" +
+                    "<head>\n" +
+                    "\n" +
+                    "<title>Avioncito de Papel</title>\n" +
+                    "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/bootstrap.css\">\n" +
+                    "</head>\n" +
+                    "<body background=\"http://www.stylishlife.co.uk/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/v/i/vintage-contemporary-old-brick-white-wallpaper2_1.jpg\">\n" +
+                    "<!-- BARRA DE NAVEGACIÓN-->\n" +
+                    "<div class=\"container-fluid\">\n" +
+                    "    <nav class=\"navbar navbar-default\" role=\"navigation\">\n" +
+                    "        <!-- Brand and toggle get grouped for better mobile display -->\n" +
+                    "        <div class=\"navbar-header\">\n" +
+                    "          <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\">\n" +
+                    "            <span class=\"sr-only\">barra de navegación</span>\n" +
+                    "            <span class=\"icon-bar\"></span>\n" +
+                    "            <span class=\"icon-bar\"></span>\n" +
+                    "            <span class=\"icon-bar\"></span>\n" +
+                    "          </button>\n" +
+                    "          <a class=\"navbar-brand\" href=\"#\">Redes</a>\n" +
+                    "        </div>\n" +
+                    "\n" +
+                    "        <!-- Collect the nav links, forms, and other content for toggling -->\n" +
+                    "        <div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\">\n" +
+                    "\n" +
+                    "          <ul class=\"nav navbar-nav\">\n" +
+                    "            <li><a href=\"index.html\">Ingresar Contacto</a></li>\n" +
+                    "            <li class=\"active\"><a href=\"vercontacto.html\">Ver Contactos</a></li>\n" +
+                    "          </ul>\n" +
+                    "\n" +
+                    "          <form class=\"navbar-form navbar-left\" role=\"search\">\n" +
+                    "            <div class=\"form-group\">\n" +
+                    "              <input type=\"text\" class=\"form-control\" placeholder=\"Buscar\">\n" +
+                    "            </div>\n" +
+                    "            <button type=\"submit\" class=\"btn btn-default\">Ir</button>\n" +
+                    "          </form>\n" +
+                    "\n" +
+                    "        </div><!-- /.navbar-collapse -->\n" +
+                    "    </nav>\n" +
+                    "\n" +
+                    "<div class=\"row\">\n" +
+                    "  <div class=\"col-md-8 col-md-offset-2\">\n" +
+                    "  <form class=\"form-inline\" role=\"form\" method=\"GET\">\n" +
+                    "\n" +
+                    "    <h2> Contactos</h2> \n" +
+                    "\n" +
+                    "    <div class=\"form-group\">\n" +
+                    "      <label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
+                    "        <select multiple class=\"form02\">\n");
+                for(int i = 0; i < list_contactos.length; i++){
+                    os.writeBytes("<option>"+list_contactos[i]+"</option>\n");
+                }
+
+                os.writeBytes("        </select>\n" +
+                    "    </div>\n" +
+                    "\n" +
+                    "    <div class=\"form-group\">\n" +
+                    "      <label class=\"sr-only\" for=\"exampleInputPassword2\"></label>\n" +
+                    "      <textarea class=\"cuadro1\" rows=\"3\"></textarea>\n" +
+                    "    </div>\n" +
+                    "\n" +
+                    "    </form>\n" +
+                    "    </div>\n" +
+                    "</div>\n" +
+                    "\n" +
+                    "<div class=class=\"col-md-8 col-md-offset-2\">\n" +
+                    "    <button type=\"submit\" class=\"btn btn-default\"><a href=\"index.html\">Agregar Contactos</a></button>\n" +
+                    "    <br><br><br><br><br>\n" +
+                    "    <p>Redes de Computadores, Primer Semestre 2014</p>\n" +
+                    "</div>\n" +
+                    "\n" +
+                    "</div>\n" +
+                    "</body>\n" +
+                    "</html>");
+            }
+            else{
+                sendBytes(fis, os); //Si la página existe se envian las líneas del archivo
                                 //encontrado.
+            }
             fis.close();
         }else{
             os.writeBytes(entityBody);  //Sino se escribe las líneas del archivo no encontrado (Not found).

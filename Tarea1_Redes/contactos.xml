@@ -21,5 +21,15 @@
             <direccion_ip>192.168.0.1</direccion_ip>
             <puerto>8542</puerto>
         </contacto>
+        <contacto>
+            <nombre>Eduardo</nombre>
+            <direccion_ip>192.168.1.1</direccion_ip>
+            <puerto>8395</puerto>
+        </contacto>
+        <contacto>
+            <nombre>RandomName</nombre>
+            <direccion_ip>192.168.1.309</direccion_ip>
+            <puerto>345853</puerto>
+        </contacto>
     </contactos>
 </root>
