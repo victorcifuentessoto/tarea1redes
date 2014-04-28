@@ -13,6 +13,8 @@ package tarea1_redes;
 import java.util.ArrayList;
 import javax.xml.bind.annotation.*;
 
+//Esta clase Contacto se usa para el manejo de archivos xml.
+
 @XmlType( propOrder={ "nombre", "direccion_ip", "puerto" } )
 public class Contacto {
     
@@ -66,10 +68,6 @@ public class Contacto {
     public void setPuerto(String puerto) {
         this.puerto = puerto;
     }
-
-    /**
-     * @return the id
-     */
     
     @XmlRootElement( name="root" )
     static public class ForSaveMultiple {
@@ -80,10 +78,8 @@ public class Contacto {
             return list;
         }
 
-        /* -- this element name "wrap" all person record */
         @XmlElementWrapper(name = "contactos")
 
-        /* -- this is element name for every person record */
         @XmlElement( name = "contacto" )
         public void setList(ArrayList<Contacto> orderDetailList) {
             this.list = orderDetailList;

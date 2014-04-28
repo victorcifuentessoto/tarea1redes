@@ -38,7 +38,6 @@ public final class HttpRequest implements Runnable {
         InputStream is = socket.getInputStream();
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        //OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), "8859_1");
         int bytes;
 
         //Escritura del request message al stream del socket
