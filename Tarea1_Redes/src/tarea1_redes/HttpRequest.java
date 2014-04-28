@@ -287,7 +287,7 @@ public final class HttpRequest implements Runnable {
                     os.writeBytes("<option>"+list_contactos[i]+"</option>\n");
                 }
 
-                os.writeBytes("        </select>\n" +
+                os.writeBytes("</select>\n" +
                     "    </div>\n" +
                     "\n" +
                     "    <div class=\"form-group\">\n" +
@@ -298,12 +298,13 @@ public final class HttpRequest implements Runnable {
                     "    </form>\n" +
                     "    </div>\n" +
                     "</div>\n" +
-                    "\n" +
+                    "<form action=\"index.html\">\n" +
                     "<div class=class=\"col-md-8 col-md-offset-2\">\n" +
                     "    <button type=\"submit\" class=\"btn btn-default\"><a href=\"index.html\">Agregar Contactos</a></button>\n" +
                     "    <br><br><br><br><br>\n" +
                     "    <p>Redes de Computadores, Primer Semestre 2014</p>\n" +
                     "</div>\n" +
+                    "</form>\n" +
                     "\n" +
                     "</div>\n" +
                     "</body>\n" +
