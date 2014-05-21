@@ -31,5 +31,15 @@
             <direccion_ip>192.168.1.309</direccion_ip>
             <puerto>345853</puerto>
         </contacto>
+        <contacto>
+            <nombre>anibal</nombre>
+            <direccion_ip>192.170.1.0</direccion_ip>
+            <puerto>3983</puerto>
+        </contacto>
+        <contacto>
+            <nombre>mauricio+del+rio</nombre>
+            <direccion_ip>198.167.1.1</direccion_ip>
+            <puerto>4470</puerto>
+        </contacto>
     </contactos>
 </root>
