@@ -82,86 +82,104 @@ public final class HttpRequest implements Runnable {
             }
             //extraccion de data de payload
             String payload = new String(outputStream.toByteArray(), "UTF-8");
-            
-
-            //se separaron las variables
-            String[] Personas = payload.split("&");
-            
-            //Se crea la clase para archivos xml
-            ForSaveMultiple forSaveMultiple = new ForSaveMultiple();
-            
-            //Trabajando con archivos xml para guardar/mostrar contactos.
-            
-            try {
-                //Se abre el archivo xml de los contactos registrados.
-                File fXmlFile = new File("contactos.xml");
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                //Conversión del archivo. En caso de error se crea un nuevo contactos.xml
-                Document doc = dBuilder.parse(fXmlFile);
+            if(payload.contains("mensaje")){
                 
-                //Se obtiene la lista de contactos por cada nodo <contacto> en el archivo.
-                NodeList lista_contactos = doc.getElementsByTagName("contacto");
+                String[] substringsMensaje = payload.split("=");
+                String mensaje = substringsMensaje[1];
+                String mensaje_mejorado = "";
                 
-                //Normaliza el archivo.
-                doc.getDocumentElement().normalize();
-                
-                list_contactos = new String[lista_contactos.getLength() + 1];
-                
-                for (int i = 0; i < lista_contactos.getLength(); i++) {
-                    Node nodo = lista_contactos.item(i);
-                    
-                    if (nodo.getNodeType() == Node.ELEMENT_NODE) {
-                        Element elemento = (Element) nodo;
-                        
-                        //Guardamos los datos del contacto del nodo actual en la clase contacto.
-                        Contacto contacto = new Contacto();
-                        
-                        contacto.setNombre(elemento.getElementsByTagName("nombre").item(0).getTextContent());
-                        contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
-                        contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
-                        forSaveMultiple.getList().add(contacto);
-                        
-                        list_contactos[i] = contacto.getNombre();
+                for(int i = 0; i < mensaje.length(); i++){
+                    if(mensaje.substring(i, i + 1).equals("+")){
+                        mensaje_mejorado = mensaje_mejorado + " ";
+                    }
+                    else{
+                        mensaje_mejorado = mensaje_mejorado + mensaje.substring(i, i + 1);
                     }
                 }
                 
-                //Crea un contacto con sus datos
-                Contacto contacto_nuevo = new Contacto();
-                contacto_nuevo.setNombre(Personas[0].substring(7));
-                contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
-                contacto_nuevo.setPuerto(Personas[2].substring(7));
-                forSaveMultiple.getList().add(contacto_nuevo);
-                
-                list_contactos[lista_contactos.getLength()] = contacto_nuevo.getNombre();
-                
-                JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                oos.writeObject(mensaje);
+            }
+            else{
+                //se separaron las variables
+                String[] Personas = payload.split("&");
 
-                Marshaller marshaller = jaxb.createMarshaller();
+                //Se crea la clase para archivos xml
+                ForSaveMultiple forSaveMultiple = new ForSaveMultiple();
 
-                marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
-                marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
-                
-                File file = new File( "contactos.xml" );
-                marshaller.marshal( forSaveMultiple, file );
-                
-        //Caso de no encontrar el archivo.     
-            } catch (ParserConfigurationException | FileNotFoundException ex) {
-                Contacto contacto_nuevo = new Contacto();
-                contacto_nuevo.setNombre(Personas[0].substring(7));
-                contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
-                contacto_nuevo.setPuerto(Personas[2].substring(7));
-                forSaveMultiple.getList().add(contacto_nuevo);
-                
-                JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+                //Trabajando con archivos xml para guardar/mostrar contactos.
 
-                Marshaller marshaller = jaxb.createMarshaller();
+                try {
+                    //Se abre el archivo xml de los contactos registrados.
+                    File fXmlFile = new File("contactos.xml");
+                    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                    //Conversión del archivo. En caso de error se crea un nuevo contactos.xml
+                    Document doc = dBuilder.parse(fXmlFile);
 
-                marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
-                marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
-                
-                File file = new File( "contactos.xml" );
-                marshaller.marshal( forSaveMultiple, file );
+                    //Se obtiene la lista de contactos por cada nodo <contacto> en el archivo.
+                    NodeList lista_contactos = doc.getElementsByTagName("contacto");
+
+                    //Normaliza el archivo.
+                    doc.getDocumentElement().normalize();
+
+                    list_contactos = new String[lista_contactos.getLength() + 1];
+
+                    for (int i = 0; i < lista_contactos.getLength(); i++) {
+                        Node nodo = lista_contactos.item(i);
+
+                        if (nodo.getNodeType() == Node.ELEMENT_NODE) {
+                            Element elemento = (Element) nodo;
+
+                            //Guardamos los datos del contacto del nodo actual en la clase contacto.
+                            Contacto contacto = new Contacto();
+
+                            contacto.setNombre(elemento.getElementsByTagName("nombre").item(0).getTextContent());
+                            contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
+                            contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
+                            forSaveMultiple.getList().add(contacto);
+
+                            list_contactos[i] = contacto.getNombre();
+                        }
+                    }
+
+                    //Crea un contacto con sus datos
+                    Contacto contacto_nuevo = new Contacto();
+                    contacto_nuevo.setNombre(Personas[0].substring(7));
+                    contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
+                    contacto_nuevo.setPuerto(Personas[2].substring(7));
+                    forSaveMultiple.getList().add(contacto_nuevo);
+
+                    list_contactos[lista_contactos.getLength()] = contacto_nuevo.getNombre();
+
+                    JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+
+                    Marshaller marshaller = jaxb.createMarshaller();
+
+                    marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+                    marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+
+                    File file = new File( "contactos.xml" );
+                    marshaller.marshal( forSaveMultiple, file );
+
+            //Caso de no encontrar el archivo.     
+                } catch (ParserConfigurationException | FileNotFoundException ex) {
+                    Contacto contacto_nuevo = new Contacto();
+                    contacto_nuevo.setNombre(Personas[0].substring(7));
+                    contacto_nuevo.setDireccion_ip(Personas[1].substring(13));
+                    contacto_nuevo.setPuerto(Personas[2].substring(7));
+                    forSaveMultiple.getList().add(contacto_nuevo);
+
+                    JAXBContext jaxb = JAXBContext.newInstance( ForSaveMultiple.class );
+
+                    Marshaller marshaller = jaxb.createMarshaller();
+
+                    marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+                    marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+
+                    File file = new File( "contactos.xml" );
+                    marshaller.marshal( forSaveMultiple, file );
+                }
             }
         }
         else if(method.equals("GET") && fileName.equals("./vercontacto.html")){
@@ -241,6 +259,7 @@ public final class HttpRequest implements Runnable {
                     "<link rel=\"stylesheet\" type=\"text/css\" href=\"css/bootstrap.css\">\n" +
                     "</head>\n" +
                     "<body background=\"http://www.stylishlife.co.uk/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/v/i/vintage-contemporary-old-brick-white-wallpaper2_1.jpg\">\n" +
+                    "\n" +
                     "<!-- BARRA DE NAVEGACIÓN-->\n" +
                     "<div class=\"container-fluid\">\n" +
                     "    <nav class=\"navbar navbar-default\" role=\"navigation\">\n" +
@@ -269,19 +288,16 @@ public final class HttpRequest implements Runnable {
                     "            </div>\n" +
                     "            <button type=\"submit\" class=\"btn btn-default\">Ir</button>\n" +
                     "          </form>\n" +
-                    "\n" +
                     "        </div><!-- /.navbar-collapse -->\n" +
                     "    </nav>\n" +
+                    "</div>\n" +
                     "\n" +
-                    "<div class=\"row\">\n" +
-                    "  <div class=\"col-md-8 col-md-offset-2\">\n" +
-                    "  <form class=\"form-inline\" role=\"form\" method=\"GET\">\n" +
-                    "\n" +
-                    "    <h2> Contactos</h2> \n" +
-                    "\n" +
-                    "    <div class=\"form-group\">\n" +
-                    "      <label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
-                    "        <select multiple class=\"form02\">\n");
+                    "<div class=\"col-md-11 col-md-offset-1\">\n" +
+                    "<form class=\"form-inline\" role=\"form\" method=\"POST\">\n" +
+                    "  <h2> Contactos</h2> \n" +
+                    "  <div class=\"form-group\">\n" +
+                    "    <label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
+                    "        <select multiple class=\"form02\" style=\"margin: 0px -0.5px 0px 0px; width: 90px; height: 130px;\">\n");
                 for(int i = 0; i < list_contactos.length; i++){
                     os.writeBytes("<option>"+list_contactos[i]+"</option>\n");
                 }
@@ -289,25 +305,36 @@ public final class HttpRequest implements Runnable {
                 os.writeBytes("</select>\n" +
                     "    </div>\n" +
                     "\n" +
-                    "    <div class=\"form-group\">\n" +
-                    "      <label class=\"sr-only\" for=\"exampleInputPassword2\"></label>\n" +
-                    "      <textarea class=\"cuadro1\" rows=\"3\"></textarea>\n" +
-                    "    </div>\n" +
-                    "\n" +
-                    "    </form>\n" +
-                    "    </div>\n" +
-                    "</div>\n" +
-                    "<form action=\"index.html\">\n" +
-                    "<div class=class=\"col-md-8 col-md-offset-2\">\n" +
-                    "    <button type=\"submit\" class=\"btn btn-default\"><a href=\"index.html\">Agregar Contactos</a></button>\n" +
-                    "    <br><br><br><br><br>\n" +
-                    "    <p>Redes de Computadores, Primer Semestre 2014</p>\n" +
-                    "</div>\n" +
-                    "</form>\n" +
-                    "\n" +
-                    "</div>\n" +
-                    "</body>\n" +
-                    "</html>");
+                    "<div class=\"form-group\">\n" +
+                "    <div class=\"row\">\n" +
+                "      <div class=\"col-md-9\">\n" +
+                "        <label class=\"sr-only\" for=\"exampleInputPassword2\"></label>\n" +
+                "        <textarea class=\"form-control\" rows=\"5\" style=\"margin: 0px -0.5px 0px 0px; width: 816px; height: 100px;\"></textarea>\n" +
+                "        <div class=\"row\">\n" +
+                "          <div class=\"col-md-6 form-group has-success\">\n" +
+                "            <label class=\"control-label\" for=\"inputSuccess1\">escribe acá</label>\n" +
+                "            <input type=\"text\" name=\"mensaje\" class=\"form-control\" id=\"inputSuccess1\">\n" +
+                "          </div>\n" +
+                "          <div class=\"col-md-0\">\n" +
+                "            <button type=\"submit\" class=\"btn btn-success\">Enviar</button>\n" +
+                "          </div>\n" +
+                "        </div>\n" +
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </div>\n" +
+                "</form>\n" +
+                "</div>\n" +
+                "\n" +
+                "<form action=\"index.html\">\n" +
+                "<div class=\"col-md-10 col-md-offset-1\">\n" +
+                "    <br>\n" +
+                "    <button type=\"submit\" class=\"btn btn-default\"><a href=\"index.html\">Agregar Contactos</a></button>\n" +
+                "    <br><br><br><br><br>\n" +
+                "    <p>Redes de Computadores, Primer Semestre 2014</p>\n" +
+                "</div>\n" +
+                "</form>\n" +
+                "</body>\n" +
+                "</html>");
             }
             else{
                 sendBytes(fis, os); //Si la página existe se envian las líneas del archivo

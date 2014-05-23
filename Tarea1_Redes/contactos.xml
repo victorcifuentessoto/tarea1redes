@@ -41,5 +41,10 @@
             <direccion_ip>198.167.1.1</direccion_ip>
             <puerto>4470</puerto>
         </contacto>
+        <contacto>
+            <nombre>Testing</nombre>
+            <direccion_ip>192.168.1.0</direccion_ip>
+            <puerto>7878</puerto>
+        </contacto>
     </contactos>
 </root>
