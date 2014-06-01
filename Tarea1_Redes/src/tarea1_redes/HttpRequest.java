@@ -2,6 +2,7 @@ package tarea1_redes;
 
 import java.io.*;
 import java.net.*;
+import static java.net.URLDecoder.decode;
 import java.util.*;
 
 import javax.xml.bind.JAXBContext;
@@ -18,6 +19,8 @@ public final class HttpRequest implements Runnable {
     String[] list_contactos;
     Socket socket;
     Socket servidor;
+    String respuestaServidor;
+    String mensaje_mejorado;
 
     // Constructor
     public HttpRequest(Socket httpServer, Socket servidorTCP) throws Exception
@@ -37,6 +40,8 @@ public final class HttpRequest implements Runnable {
 
     private void processRequest() throws Exception
     {
+        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(servidor.getInputStream()));
+        DataOutputStream outToServer = new DataOutputStream(servidor.getOutputStream());
         InputStream is = socket.getInputStream();
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -88,19 +93,48 @@ public final class HttpRequest implements Runnable {
                 
                 String[] substringsMensaje = payload.split("=");
                 String mensaje = substringsMensaje[1];
-                String mensaje_mejorado = "";
+                mensaje_mejorado = decode(mensaje, "UTF-8");;
                 
-                for(int i = 0; i < mensaje.length(); i++){
-                    if(mensaje.substring(i, i + 1).equals("+")){
-                        mensaje_mejorado = mensaje_mejorado + " ";
-                    }
-                    else{
-                        mensaje_mejorado = mensaje_mejorado + mensaje.substring(i, i + 1);
-                    }
+                //Escribe el mensaje al servidor
+                outToServer.writeBytes(mensaje_mejorado + "\n");
+                //Recibe el mensaje del servidor.
+                if(mensaje_mejorado.startsWith("MENSAJE")){
+                    respuestaServidor = inFromServer.readLine();
+                }
+                else if (mensaje_mejorado.startsWith("ARCHIVO")){
+                    
                 }
                 
-                ObjectOutputStream oos = new ObjectOutputStream(servidor.getOutputStream());
-                oos.writeObject(mensaje);
+                //Se abre el archivo xml de los contactos registrados.
+                File fXmlFile = new File("contactos.xml");
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                //Conversión del archivo. En caso de error se crea un nuevo contactos.xml
+                Document doc = dBuilder.parse(fXmlFile);
+
+                //Se obtiene la lista de contactos por cada nodo <contacto> en el archivo.
+                NodeList lista_contactos = doc.getElementsByTagName("contacto");
+
+                //Normaliza el archivo.
+                doc.getDocumentElement().normalize();
+
+                list_contactos = new String[lista_contactos.getLength()];
+
+                for (int i = 0; i < lista_contactos.getLength(); i++) {
+                    Node nodo = lista_contactos.item(i);
+
+                    if (nodo.getNodeType() == Node.ELEMENT_NODE) {
+                        Element elemento = (Element) nodo;
+
+                        Contacto contacto = new Contacto();
+
+                        contacto.setNombre(elemento.getElementsByTagName("nombre").item(0).getTextContent());
+                        contacto.setDireccion_ip(elemento.getElementsByTagName("direccion_ip").item(0).getTextContent()); 
+                        contacto.setPuerto(elemento.getElementsByTagName("puerto").item(0).getTextContent());
+
+                        list_contactos[i] = contacto.getNombre();
+                    }
+                }
             }
             else{
                 //se separaron las variables
@@ -300,8 +334,10 @@ public final class HttpRequest implements Runnable {
                     "  <div class=\"form-group\">\n" +
                     "    <label class=\"sr-only\" for=\"exampleInputconectados\"></label>\n" +
                     "        <select multiple class=\"form02\" style=\"margin: 0px -0.5px 0px 0px; width: 90px; height: 130px;\">\n");
-                for(int i = 0; i < list_contactos.length; i++){
-                    os.writeBytes("<option>"+list_contactos[i]+"</option>\n");
+                if(list_contactos != null){
+                    for (String list_contacto : list_contactos) {
+                        os.writeBytes("<option>" + list_contacto + "</option>\n");
+                    }
                 }
 
                 os.writeBytes("</select>\n" +
@@ -311,7 +347,7 @@ public final class HttpRequest implements Runnable {
                 "    <div class=\"row\">\n" +
                 "      <div class=\"col-md-9\">\n" +
                 "        <label class=\"sr-only\" for=\"exampleInputPassword2\"></label>\n" +
-                "        <textarea class=\"form-control\" rows=\"5\" style=\"margin: 0px -0.5px 0px 0px; width: 816px; height: 100px;\"></textarea>\n" +
+                "        <textarea readonly class=\"form-control\" rows=\"5\" style=\"margin: 0px -0.5px 0px 0px; width: 816px; height: 100px;\"></textarea>\n" +
                 "        <div class=\"row\">\n" +
                 "          <div class=\"col-md-6 form-group has-success\">\n" +
                 "            <label class=\"control-label\" for=\"inputSuccess1\">escribe acá</label>\n" +
