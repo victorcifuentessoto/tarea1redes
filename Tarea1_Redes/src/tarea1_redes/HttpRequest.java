@@ -17,11 +17,13 @@ public final class HttpRequest implements Runnable {
     final static String CRLF = "\r\n";
     String[] list_contactos;
     Socket socket;
+    Socket servidor;
 
     // Constructor
-    public HttpRequest(Socket socket) throws Exception
+    public HttpRequest(Socket httpServer, Socket servidorTCP) throws Exception
     {
-       this.socket = socket;
+       this.socket = httpServer;
+       this.servidor = servidorTCP;
     }
 
     public void run()
@@ -97,7 +99,7 @@ public final class HttpRequest implements Runnable {
                     }
                 }
                 
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                ObjectOutputStream oos = new ObjectOutputStream(servidor.getOutputStream());
                 oos.writeObject(mensaje);
             }
             else{
