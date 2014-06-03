@@ -11,7 +11,7 @@ public final class Tarea1_Redes {
     public static void main(String[] args) throws Exception {
         //Se crea el servidor TCP y el servidor http.
         Socket servidor = new Socket(host, port);
-        ServerSocket listener = new ServerSocket(8090);
+        ServerSocket listener = new ServerSocket(0);
         //Espera respuesta del cliente.
         while(true){
             Socket connectionSocket = listener.accept();

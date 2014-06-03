@@ -43,6 +43,7 @@ public final class HttpRequest implements Runnable {
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(servidor.getInputStream()));
         DataOutputStream outToServer = new DataOutputStream(servidor.getOutputStream());
         InputStream is = socket.getInputStream();
+        InputStream inputFile = servidor.getInputStream();
         DataOutputStream os = new DataOutputStream(socket.getOutputStream());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int bytes;
@@ -101,8 +102,24 @@ public final class HttpRequest implements Runnable {
                 if(mensaje_mejorado.startsWith("MENSAJE")){
                     respuestaServidor = inFromServer.readLine();
                 }
-                else if (mensaje_mejorado.startsWith("ARCHIVO")){
-                    
+                else if (mensaje_mejorado.startsWith("ARCHIVO")) {  
+                    byte [] mybytearray  = new byte [6022386];
+                    int bytesRead;
+                    int current = 0;
+                    FileOutputStream fos = null;
+                    BufferedOutputStream bos = null;
+                    fos = new FileOutputStream("");
+                    bos = new BufferedOutputStream(fos);
+                    bytesRead = inputFile.read(mybytearray,0,mybytearray.length);
+                    current = bytesRead;
+                    do {
+                        bytesRead = is.read(mybytearray, current, (mybytearray.length-current));
+                        if(bytesRead >= 0) 
+                            current += bytesRead;
+                    } while(bytesRead > -1);
+
+                    bos.write(mybytearray, 0 , current);
+                    bos.flush();
                 }
                 
                 //Se abre el archivo xml de los contactos registrados.
