@@ -302,6 +302,7 @@ public final class HttpRequest implements Runnable {
                     mensajes_nuevos = mensajes_nuevos + line_mensajes_nuevos + "\n";
                     writer.println(line_mensajes_nuevos);
                 }
+                writer.close();
             }
             historial = historial + mensajes_nuevos + "\n";
             
