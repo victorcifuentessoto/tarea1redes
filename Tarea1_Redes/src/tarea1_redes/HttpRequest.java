@@ -21,6 +21,7 @@ public final class HttpRequest implements Runnable {
     Socket servidor;
     String respuestaServidor;
     String mensaje_mejorado;
+    String historial = ""; //Muestra en el textarea el historial cliente-servidor.
 
     // Constructor
     public HttpRequest(Socket httpServer, Socket servidorTCP) throws Exception
@@ -122,6 +123,35 @@ public final class HttpRequest implements Runnable {
                     bos.flush();
                 }
                 
+                //Creación del archivo que guarda historial de mensajes (textarea)
+                File archivoHistorial = new File("Historial.txt");
+                if(archivoHistorial.exists() && !archivoHistorial.isDirectory()){
+                    PrintWriter writer = new PrintWriter("temp.txt", "UTF-8");
+                    BufferedReader reader = new BufferedReader(new FileReader("Historial.txt"));
+                    String line;
+                    while((line = reader.readLine()) != null){
+                        writer.println(line);
+                    }
+                    writer.println(respuestaServidor);
+                    reader.close();
+                    writer.close();
+                    File tempFile = new File("temp.txt");
+                    PrintWriter newWriterFile = new PrintWriter("Historial.txt", "UTF-8");
+                    BufferedReader readerTmp = new BufferedReader(new FileReader("temp.txt"));
+                    while((line = readerTmp.readLine()) != null){
+                        newWriterFile.println(line);
+                        historial = historial + line + "\n";
+                    }
+                    newWriterFile.close();
+                    readerTmp.close();
+                    tempFile.delete();
+                }
+                else{
+                    PrintWriter writer = new PrintWriter("Historial.txt", "UTF-8");
+                    writer.println(respuestaServidor);
+                    writer.close();
+                    historial = historial + respuestaServidor + "\n";
+                }
                 //Se abre el archivo xml de los contactos registrados.
                 File fXmlFile = new File("contactos.xml");
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -290,7 +320,8 @@ public final class HttpRequest implements Runnable {
             contentTypeLine = "Content-Type: text/html" + CRLF;
             entityBody = "<HTML>" + "<HEAD><TITLE>Not Found</TITLE></HEAD>" + "<BODY>PAGE NOT FOUND</BODY></HTML>";
         }
-
+        
+        
         // Envío del statusLine.
         os.writeBytes(statusLine);
 
@@ -364,7 +395,7 @@ public final class HttpRequest implements Runnable {
                 "    <div class=\"row\">\n" +
                 "      <div class=\"col-md-9\">\n" +
                 "        <label class=\"sr-only\" for=\"exampleInputPassword2\"></label>\n" +
-                "        <textarea readonly class=\"form-control\" rows=\"5\" style=\"margin: 0px -0.5px 0px 0px; width: 816px; height: 100px;\"></textarea>\n" +
+                "        <textarea readonly class=\"form-control\" rows=\"5\" style=\"margin: 0px -0.5px 0px 0px; width: 816px; height: 100px;\">" + historial + "</textarea>\n" +
                 "        <div class=\"row\">\n" +
                 "          <div class=\"col-md-6 form-group has-success\">\n" +
                 "            <label class=\"control-label\" for=\"inputSuccess1\">escribe acá</label>\n" +
