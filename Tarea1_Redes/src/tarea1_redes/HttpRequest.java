@@ -272,17 +272,36 @@ public final class HttpRequest implements Runnable {
             outToServer.writeBytes("UPDATE\n");
             if(archivoHistorial.exists() && !archivoHistorial.isDirectory()){
                 BufferedReader reader = new BufferedReader(new FileReader("Historial_" + socket.getLocalPort() + ".txt"));
+                PrintWriter writerTemp = new PrintWriter("temp.txt", "UTF-8");
                 String line;
                 while((line = reader.readLine()) != null){
                     historial = historial + line + "\n";
+                    writerTemp.println(line);
                 }
                 reader.close();
+                writerTemp.close();
+                String line_mensajes_nuevos;
+                File tempFile = new File("temp.txt");
+                PrintWriter writer = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
+                BufferedReader readerTmp = new BufferedReader(new FileReader("temp.txt"));
+                while((line = readerTmp.readLine()) != null){
+                    writer.println(line);
+                }
+                while(!"".equals(line_mensajes_nuevos = inFromServer.readLine())){
+                    mensajes_nuevos = mensajes_nuevos + line_mensajes_nuevos + "\n";
+                    writer.println(line_mensajes_nuevos);
+                }
+                readerTmp.close();
+                writer.close();
+                tempFile.delete();
             }
-            String line_mensajes_nuevos;
-            PrintWriter writer = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
-            while(!"".equals(line_mensajes_nuevos = inFromServer.readLine())){
-                mensajes_nuevos = mensajes_nuevos + line_mensajes_nuevos + "\n";
-                writer.println(line_mensajes_nuevos);
+            else{
+                String line_mensajes_nuevos;
+                PrintWriter writer = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
+                while(!"".equals(line_mensajes_nuevos = inFromServer.readLine())){
+                    mensajes_nuevos = mensajes_nuevos + line_mensajes_nuevos + "\n";
+                    writer.println(line_mensajes_nuevos);
+                }
             }
             historial = historial + mensajes_nuevos + "\n";
             
