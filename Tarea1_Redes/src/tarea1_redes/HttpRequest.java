@@ -459,7 +459,9 @@ public final class HttpRequest implements Runnable {
                 "</div>\n" +
                 "</form>\n" +
                 "<script>\n" +
-                "setInterval(function(){location.reload();},20000);\n" +
+                "    setInterval(function(){\n" +
+                "		window.location = window.location.href;\n" +
+                "		},20000);\n" +
                 "</script></body>\n" +
                 "</html>");
             }
