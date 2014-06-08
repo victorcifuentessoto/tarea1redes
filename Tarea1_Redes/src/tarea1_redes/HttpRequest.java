@@ -124,10 +124,10 @@ public final class HttpRequest implements Runnable {
                 }
                 
                 //Creación del archivo que guarda historial de mensajes (textarea)
-                File archivoHistorial = new File("Historial.txt");
+                File archivoHistorial = new File("Historial_" + socket.getLocalPort() + ".txt");
                 if(archivoHistorial.exists() && !archivoHistorial.isDirectory()){
                     PrintWriter writer = new PrintWriter("temp.txt", "UTF-8");
-                    BufferedReader reader = new BufferedReader(new FileReader("Historial.txt"));
+                    BufferedReader reader = new BufferedReader(new FileReader("Historial_" + socket.getLocalPort() + ".txt"));
                     String line;
                     while((line = reader.readLine()) != null){
                         writer.println(line);
@@ -136,7 +136,7 @@ public final class HttpRequest implements Runnable {
                     reader.close();
                     writer.close();
                     File tempFile = new File("temp.txt");
-                    PrintWriter newWriterFile = new PrintWriter("Historial.txt", "UTF-8");
+                    PrintWriter newWriterFile = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
                     BufferedReader readerTmp = new BufferedReader(new FileReader("temp.txt"));
                     while((line = readerTmp.readLine()) != null){
                         newWriterFile.println(line);
@@ -147,7 +147,7 @@ public final class HttpRequest implements Runnable {
                     tempFile.delete();
                 }
                 else{
-                    PrintWriter writer = new PrintWriter("Historial.txt", "UTF-8");
+                    PrintWriter writer = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
                     writer.println(respuestaServidor);
                     writer.close();
                     historial = historial + respuestaServidor + "\n";
@@ -266,6 +266,26 @@ public final class HttpRequest implements Runnable {
             }
         }
         else if(method.equals("GET") && fileName.equals("./vercontacto.html")){
+            //Revisa si hay mensajes nuevos.
+            String mensajes_nuevos = "";
+            File archivoHistorial = new File("Historial_" + socket.getLocalPort() + ".txt");
+            outToServer.writeBytes("UPDATE\n");
+            if(archivoHistorial.exists() && !archivoHistorial.isDirectory()){
+                BufferedReader reader = new BufferedReader(new FileReader("Historial_" + socket.getLocalPort() + ".txt"));
+                String line;
+                while((line = reader.readLine()) != null){
+                    historial = historial + line + "\n";
+                }
+                reader.close();
+            }
+            String line_mensajes_nuevos;
+            PrintWriter writer = new PrintWriter("Historial_" + socket.getLocalPort() + ".txt", "UTF-8");
+            while(!"".equals(line_mensajes_nuevos = inFromServer.readLine())){
+                mensajes_nuevos = mensajes_nuevos + line_mensajes_nuevos + "\n";
+                writer.println(line_mensajes_nuevos);
+            }
+            historial = historial + mensajes_nuevos + "\n";
+            
             //Se abre el archivo xml de los contactos registrados.
             File fXmlFile = new File("contactos.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -419,7 +439,9 @@ public final class HttpRequest implements Runnable {
                 "    <p>Redes de Computadores, Primer Semestre 2014</p>\n" +
                 "</div>\n" +
                 "</form>\n" +
-                "</body>\n" +
+                "<script>\n" +
+                "setInterval(function(){location.reload();},20000);\n" +
+                "</script></body>\n" +
                 "</html>");
             }
             else{
